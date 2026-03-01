@@ -1,16 +1,13 @@
-# Fast Simon Hiring Challenge - Related Queries API
-**Submitted by:** Rona Lavi
+# Real-Time Search Suggestions Pipeline
+### BigQuery • Datastore • App Engine
 
 ## Project Overview
-This project implements a high-performance "Related Queries" API designed to handle 1 million search logs and provide real-time recommendations with low latency. The pipeline processes raw data in BigQuery, ingests it into Datastore, and serves it via a Flask application on Google App Engine.
+This project implements a high-performance Related Queries API designed to process 1 million search logs and deliver real-time recommendations. The system leverages a GCP-native ETL pipeline to transform raw data into a serving-ready format, optimized for scalability and data integrity.
 
 ---
 
 ## 1. Data Preprocessing (SQL)
 The preprocessing was performed in **Google BigQuery** to handle large-scale data transformation.
-
-![BigQuery SQL Workspace](image_aec5c3.jpg)
-*Visualizing the extraction logic and Jaccard results directly in the BigQuery console.*
 
 ### Key Logic Features:
 * **Stemming:** Used `REGEXP_REPLACE` to standardize query variations (e.g., 'hoodie' and 'hoodies'), ensuring diverse top-K results.
@@ -21,21 +18,21 @@ The preprocessing was performed in **Google BigQuery** to handle large-scale dat
 * **Symmetry:** Bidirectional relationships were assumed to maximize recommendation coverage.
 
 ## 2. Data Ingestion & Storage
-* **Storage:** Used **Google Cloud Datastore** for its high scalability and sub-50ms internal retrieval capabilities.
-* **Key Design:** The search query itself is used as the **Datastore Key**, enabling $O(1)$ lookup complexity during API requests.
+ The search query itself is used as the **Datastore Key**, enabling $O(1)$ lookup complexity during API requests.
 
 ## 3. GAE Application (The API)
-The API is a **Python Flask** application deployed on **Google App Engine** in the **US region** (Project: `rona-455616`).
+The API is a **Python Flask** application deployed on **Google App Engine**.
 
 
 ### Performance Optimizations:
-* **LRU Caching:** An in-memory cache (size 5000) was implemented to cover the dataset (~3000 keys), significantly reducing Datastore read costs and latency.
+* **LRU Caching:** An in-memory cache (size 5000) was implemented, significantly reducing Datastore read costs and latency.
 * **Anti-Cold Start:** Configured `min_idle_instances: 1` in `app.yaml` to maintain steady performance.
 
 ## 4. Performance & Load Testing
 System efficiency was verified through load tests simulating 10 concurrent users for 200 requests.
 
 ![Load Test Results](results.png)
+
 *Results show a clear **warm-up effect**: as the LRU cache populates, average latency drops to **107.84ms** (including Network RTT).*
 
 ---
