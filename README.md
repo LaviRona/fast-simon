@@ -40,7 +40,7 @@ Functional verification was performed using `test_api.py` to ensure the system h
 * **Normalization & Case Sensitivity:** Confirming that the normalization layer correctly maps variations like 'HOODIES' to the pre-processed keys.
 * **Edge Cases & Security:** Verifying that empty strings, short queries ('to'), and special characters ('@') return an empty list `[]` to prevent "garbage" output.
 
-![Unit Test Results](unit_test_results.png)
+![Unit Test Results](Unit Test Results.png)
 
 ---
 
