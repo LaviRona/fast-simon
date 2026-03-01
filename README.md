@@ -21,17 +21,38 @@ The preprocessing was performed in **Google BigQuery** to handle large-scale dat
  The search query itself is used as the **Datastore Key**, enabling $O(1)$ lookup complexity during API requests.
 
 ## 3. GAE Application (The API)
-The API is a **Python Flask** application deployed on **Google App Engine**.
+The API is a **Python Flask** application deployed on **Google App Engine**.  
+Link: https://fast-simon-rona.ey.r.appspot.com/related  
+To use the API, append the query parameter to the base URL as shown below:  
+https://fast-simon-rona.ey.r.appspot.com/related?query=dress
 
 
 ### Performance Optimizations:
 * **LRU Caching:** An in-memory cache (size 5000) was implemented, significantly reducing Datastore read costs and latency.
 * **Anti-Cold Start:** Configured `min_idle_instances: 1` in `app.yaml` to maintain steady performance.
 
-## 4. Performance & Load Testing
-System efficiency was verified through load tests simulating 10 concurrent users for 200 requests.
+## 4. Performance & Testing
+
+### Unit Testing
+Functional verification was performed using `test_api.py` to ensure the system handles various query types correctly. The test suite covers:
+
+* **Popular & Less Popular Queries:** Validating successful retrieval of high-confidence results (e.g., 'hoodies', 'cola').
+* **Normalization & Case Sensitivity:** Confirming that the normalization layer correctly maps variations like 'HOODIES' to the pre-processed keys.
+* **Edge Cases & Security:** Verifying that empty strings, short queries ('to'), and special characters ('@') return an empty list `[]` to prevent "garbage" output.
+
+![Unit Test Results](unit_test_results.png)
+
+---
+
+### Load Testing
+To simulate real-world concurrent usage, a load test was conducted using `load_test.py`. The test simulated **10 concurrent users** making a total of **200 requests**, with queries sampled according to their original log distribution.
 
 ![Load Test Results](results.png)
+
+**Key Observations:**
+* **Warm-up Effect:** The initial requests experienced higher latency due to "Cold Starts" and an empty cache.
+* **Optimization:** Once the **LRU Cache** was populated, the average response time stabilized significantly, demonstrating the system's ability to handle high concurrency efficiently.
+
 
 *Results show a clear **warm-up effect**: as the LRU cache populates, average latency drops to **107.84ms** (including Network RTT).*
 
